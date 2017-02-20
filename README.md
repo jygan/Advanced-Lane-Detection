@@ -1,7 +1,7 @@
 
 # Advanced Lane Finding Project
 
-## In this project, the goal is to write a software pipeline to identify the lane boundaries in a video.
+## Project Goal: Develop a software pipeline to identify the lane boundaries in a video from a front-facing camera on a car. Detect lane lines in a variety of conditions, including changing road surfaces, curved roads, and variable lighting.
 
 ### The software pipeline consists of the following stages:
 
@@ -9,9 +9,9 @@
 2. [Apply a distortion correction to raw images.](#2)
 3. [Use color transforms and gradients to create a thresholded binary image.](#3)
 4. [Apply a perspective transform to rectify binary image ("birds-eye view").](#4)
-5. [Detect lane pixels and fit to find the lane boundary.](#5)
+5. [Detect lane pixels and fit a polynomial expression to find the lane boundary.](#5)
 6. [Determine the curvature of the lane and vehicle position with respect to center.](#6)
-7. [Warp the detected lane boundaries back onto the original image.](#7)
+7. [Overlay the detected lane boundaries back onto the original image.](#7)
 8. [Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position in the video.](#8)
 
 ![Project Video](P1gif.gif)
@@ -20,13 +20,13 @@
 
 Open the **advanced_lane.ipynb** and run !!
 
-### Now lets discuss each of these software pipeline stages in detail. 
+### Let us now discuss each of these software pipeline stages in detail. 
 
-## Camera Calibration Stage<a name="1"/>
+## Step 1: Camera Calibration Stage<a name="1"/>
 
-Real cameras use curved lenses to form an image, and light rays often bend a little too much or too little at the edges of these lenses. This creates an effect that distorts the edges of images, so that lines or objects appear more or less curved than they actually are. This is called radial distortion, and it’s the most common type of distortion.
+Real cameras use curved lenses to form an image, and light rays often bend a little too much or too little at the edges of these lenses. This creates an effect that distorts the edges of images, so that lines or objects appear more or less curved than they actually are. This is called radial distortion, which is the most common type of distortion.
 
-There are three coefficients needed to correct for radial distortion: k<sub>1</sub>, k<sub>2</sub>, and k<sub>3</sub>. To correct the appearance of radially distorted points in an image, one can use a correction formula mentioned below.
+There are three coefficients needed to correct radial distortion: k<sub>1</sub>, k<sub>2</sub>, and k<sub>3</sub>. To correct the appearance of radially distorted points in an image, one can use a correction formula mentioned below.
 
 ![Calibration](output_images/calibration_explian.png?raw=true "Calibration")
 ![Calibration correction](output_images/cal_radial_formulae.png?raw=true "Calibration corrrection")
@@ -47,82 +47,81 @@ The **do_calibration()** function performs the following operations:
 
 The **get_camera_calibration()** function is to read the calibration values from the **camera_cal/camera_cal.p** file.
 
-## Distortion Correction Stage<a name="2"/>
+## Step 2: Distortion Correction Stage<a name="2"/>
 
-Using the distortion co-efficients and camera matrix obtaine dfrom the camera calibration stage we undistort the images using the **cv2.undistort** function.
+Using the distortion co-efficients and camera matrix obtained from the camera calibration stage we undistort the images using the **cv2.undistort** function.
 
 **A sample chessboard image and corresponding undistorted image is shown below:**
 ![Calibration sample 1](output_images/cal_sample_chess.png?raw=true "Calibration sample 1")
 
-By perfoming the distortion correction we can see that the cheesboard lines appear to be parallel compared to the original raw image.
+By perfoming the distortion correction we see that the chessboard lines appear to be parallel compared to the original raw image.
 
 **Another sample image and corresponding undistorted image is shown below:**
 ![Calibration sample 2](output_images/cal_sample.png?raw=true "Calibration sample 2")
 
 We can see that the left car appears to be shifted left compared to the original raw image. 
 
-## Creating a Thresholded binary image using color transforms and gradients<a name="3"/>
+## Step 3: Creating a Thresholded binary image using color transforms and gradients<a name="3"/>
 
 In the thresholding binary image stage, multiple transformations are applied and later combined to get the best binary image for lane detection.
 
 The code for the thresholding operation are in the file named **thresholding_main.py**. In this file various thresholding operations are defined which are explained below. 
 
-### Saturation thresholding: 
+### Step 3.1: Saturation thresholding: 
 The images are transformed to HLS color space to obtain the saturation values, the **yellow color lanes** are best detected in the saturation color space. This thresholding operation is called in the **color_thr()** function. 
 ![Saturation 1](output_images/sat.jpg?raw=true "Saturation 1")
 ![Saturation 2](output_images/saturation.jpg?raw=true "Saturation 2")
 
-### Histogram equalized thresholding: 
+### Step 3.2: Histogram equalized thresholding: 
 The images are transformed to gray scale and histogram is equalized using the **cv2.equalizeHist()** function, the **white color lanes** are best detected using this. This thresholding operation is called in the **adp_thresh_grayscale()** function. 
 ![Histogram Equalisation](output_images/th_hist.png?raw=true "Histogram Equalisation")
 
-### Gradient Thresholding: 
+### Step 3.3: Gradient Thresholding: 
 The **Sobel operator** is applied to get the gradients in the **x** and **y** direction which are also used to get the **magnitude** and **direction** thresholded images.
 To explain these thresholding I use the below test image and apply the 4 thresholding operations.
 ![Original](test_images/test2.jpg?raw=true "Original Frame")
 
-* **Gradient thresholded in x-direction using Sobel operator** This thresholding operation is called in the **abs_sobel_thresh()** function. 
+* **Step 3.3.1: Gradient thresholded in x-direction using Sobel operator** This thresholding operation is called in the **abs_sobel_thresh()** function. 
 
 ![Gradient X thresholding](output_images/gradx.png?raw=true "Gradient X thresholding")
 
-* **Gradient thresholded in y-direction using Sobel operator** This thresholding operation is called in the **abs_sobel_thresh()** function. 
+* **Step 3.3.2: Gradient thresholded in y-direction using Sobel operator** This thresholding operation is called in the **abs_sobel_thresh()** function. 
 
 ![Gradient Y thresholding](output_images/grady.png?raw=true "Gradient Y thresholding")
 
-* **Magnitude threshold of the Gradient** This thresholding operation is called in the **mag_thresh()** function. 
+* **Step 3.3.3: Magnitude threshold of the Gradient** This thresholding operation is called in the **mag_thresh()** function. 
 
 ![Gradient Magnitude thresholding](output_images/gradm.png?raw=true "Gradient Magnitude thresholding") 
 
-* **Direction threshold of the Gradient**  This thresholding operation is called in the **dir_threshold()** function. 
+* **Step 3.3.4: Direction threshold of the Gradient**  This thresholding operation is called in the **dir_threshold()** function. 
 
 ![Gradient Directional thresholding](output_images/gradd.png?raw=true "Gradient Magnitude thresholding") 
 
-### Region of Interest: 
+### Step 3.4: Region of Interest: 
 Masking to concentrate on the essential part of the image - the lanes. The **region_of_interest()** function is implemented in the **perspective_regionofint_main.py** file. 
 
 The below figure shows the region of interest
 ![ROI](output_images/roi1.png?raw=true "ROI")
 
-### Combining the above thresholding step to get the best binary image for lane detection. 
+### Step 3.5: Combining the above thresholding step to get the best binary image for lane detection. 
 
 To obtain the clear distinctive lanes in the binary image, threshold parameters for the above operation have to be fine tuned. This is the most critical part as the clear visible lanes are easier to detectt and fit a poly in future steps. **The fine tuning process is done by interactively varying the threshold values and checking the results as shown below.** Here the **Region of Interest** is also implemented to get the final binary image.
 
 ![Thresholding Combined](output_images/int_final.png?raw=true "Thresholding Combine")
 
-After finalizing the thresholding parameters, we proceed to the next pipeline stage - **Perspective transformation**.
+## Step 4: Perspective transformation: <a name="4"/>
 
-## Perspective transformation: <a name="4"/>
-A perspective transform maps the points in a given image to different, desired, image points with a new perspective. For this project, perspective transformation is applied to get a **bird’s-eye** view like transform, that let’s us view a lane from above; this will be useful for calculating the lane curvature later on.
+After finalizing the thresholding parameters, we proceed to the next pipeline stage - **Perspective transformation**. A perspective transform maps the points in a given image to different, desired, image points with a new perspective. For this project, perspective transformation is applied to get a **bird’s-eye** view like transform, that let’s us view a lane from above; this will be useful for calculating the lane curvature later on.
 
 The code for the perspective transformation is defined in the function **perspective_transform()** which is included in the file **perspective_regionofint_main.py**.
 The source and destination points for the perspective transformation are in the following manner:
 
-| Source        | Destination   |
+| **Source**        | **Destination**   |
 | ------------- |:-------------:|
-| **704,453**   | **960,0**     |
-| **1280,720**  | **960,720**   |
-| **0,720**     | **320,720**   |
-| **576,453**  | **320,0**     |
+| 704,453   | 960,0     |
+| 1280,720  | 960,720   |
+| 0,720    | 320,720   |
+| 576,453  | 320,0     |
 
 **The following images shows the perspective transformation from source to destination.**
 
@@ -134,29 +133,29 @@ The source and destination points for the perspective transformation are in the 
 ![Perspective Transform 3](output_images/pers2.png?raw=true "Perspective Transform 3")
 ![Perspective Transform 4](output_images/pers2_f.png?raw=true "Perspective Transform 4")
 
-## Detect lane pixels and fit to find the lane boundary.<a name="5"/>
+## Step 5: Detect lane pixels and fit to find the lane boundary.<a name="5"/>
 
 After applying calibration, thresholding, and a perspective transform to a road image, we have a binary image where the lane lines stand out clearly as shown above. Next a polynomial curve is fitted to the lanes. This is defined in the function **for_sliding_window()** included in the file **sliding_main.py**
 
-For this, I first take a histogram along all the columns in the lower half of the image. Th histogram plot is shown below.
+For this, I first take a histogram along all the columns in the lower half of the image. The histogram plot is shown below.
 ![Lane ppixel histogram](output_images/hist.png?raw=true "Lane ppixel histogram")
 With this histogram, I am adding up the pixel values along each column in the image. In my thresholded binary image, pixels are either 0 or 1, so the two most prominent peaks in this histogram will be good indicators of the x-position of the base of the lane lines. I use that as a starting point to search for the lines. From that point, I use a sliding window, placed around the line centers, to find and follow the lines up to the top of the frame. The sliding window technique can be shown as in the below image:
 ![Lane pixel histogram](output_images/slide.png?raw=true "Lane pixel histogram")
 In the above image the sliding windows are shown in green, left lanes are red colored, right lanes are blue colored and the polynomial fits are yellow lines.
 
-This pipeline when applied to the video frames gives lots of jittering between the frames. I have implemented the smoothing/average over 10 previous frames to get a jitter free lane lane detection. This average value polynomial fits of the previous frames are also used in senarios where the poly fits are not resonable in the current frame as shown in the figure below.
+This pipeline when applied to the video frames gives lots of jittering between the frames. I have implemented the smoothing/average over 10 previous frames to get a jitter free lane detection. This average value polynomial fits of the previous frames are also used in senarios where the polynomial fits are not reasonable in the current frame as shown in the figure below.
 ![Smoothened values](output_images/smooth.png?raw=true "Smoothened values")
 Here the green lines are the polynomial fit of the past 10 frames and the blue represents the polynomial fit for the current frame. The lane pixels are pink colored. It can be observed that the left and right lanes cross each other which is not a practical scenario, so a better judgement call here is to consider the averaged polynomial of the past frames in these cases.
 
-## Determine the curvature of the lane and vehicle position with respect to center.<a name="6"/>
+## Step 6: Determine the curvature of the lane and vehicle position with respect to center.<a name="6"/>
 The **curvature of the lanes** f<sub>(y)</sub> are calculated by using the formulae R<sub>(curve)</sub>
 ![Curvature](output_images/rcurve.png?raw=true "Curvature")
 
 The **vehicle position** is calculated as the difference between the image center and the lane center. It is shown in the below image as the offset from the center
 
-## Warp the detected lane boundaries back onto the original image.<a name="7"/>
+## Step 7: Overlay the detected lane boundaries back onto the original image.<a name="7"/>
 
-NOw we can wrap the detected lanes on the original images using inverse perspective transform. The below image shows the mapping of the polynomial fits on the original image. **The region between the lanes are colored green indicating higher confidence region. The region on the farthest end are colored red indicating that the lanes detected are low confidence region.**
+Now we can wrap the detected lanes on the original images using inverse perspective transform. The below image shows the mapping of the polynomial fits on the original image. **The region between the lanes are colored green indicating higher confidence region. The region on the farthest end are colored red indicating that the lanes detected are low confidence region.**
 
 ![Mapped Original](output_images/finalimage.png?raw=true "Mapped Original")
 
@@ -164,7 +163,7 @@ NOw we can wrap the detected lanes on the original images using inverse perspect
 
 This project involves fine tuning of lot of parameters like color thresholding, gradient thresholding values to obtain the best lane detection. This can be tricker if the pipeline fails for few video frames. To efficiently debug this I had to build a frame that captures multiple stages of the pipeline, like the color transformation, gradient thresholding, line fitting on present and averaged past frames.
 
-The viodeo of the diagnostic tool is shown below:
+The video of the diagnostic tool is shown below:
 
 ### Project Video diagnosis:
 
