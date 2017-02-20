@@ -34,10 +34,15 @@ There are three coefficients needed to correct for radial distortion: k<sub>1</s
 In the following equations, (x,y) is a point in a distorted image. To undistort these points, OpenCV calculates r, which is the known distance between a point in an undistorted (corrected) image (x<sub>corrected</sub> ,y<sub>corrected</sub>) and the center of the image distortion, which is often the center of that image (x<sub>c</sub> ,y<sub>c</sub> ). This center point (x<sub>c</sub> ,y<sub>c</sub>) is sometimes referred to as the distortion center. These points are pictured above.
 
 The **do_calibration()** function performs the following operations:
+
 1. Read chessboad images and convert to gray scale
+
 2. Find the chessboard corners. 
+
     * I start by preparing **object points**, which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the **object points** are the same for each calibration image. Thus, **objp** is just a replicated array of coordinates, and **objpoints** will be appended with a copy of it every time I successfully detect all chessboard corners in a test image. **imgpoints** will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection. 
+
 3. Performs the **cv2.calibrateCamera()** to compute the distortion co-efficients and camera matrix that we need to transform the 3d object points to 2d image points.  
+
 4. Store the calibration values in the **camera_cal/camera_cal.p** file to use it later.
 
 The **get_camera_calibration()** function is to read the calibration values from the **camera_cal/camera_cal.p** file.
