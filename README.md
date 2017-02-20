@@ -14,7 +14,7 @@
 7. [Overlay the detected lane boundaries back onto the original image.](#7)
 8. [Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position in the video.](#8)
 
-![Project Video](P1gif.gif)
+![Project Video](examples/P1_small.gif)
 
 ### Steps to run the project:
 
@@ -169,7 +169,7 @@ The video of the diagnostic tool is shown below:
 
 [![Track 2 - Test arena](output_images/yP1d.png)](https://www.youtube.com/watch?v=iKnfenrFFSo "Project Video diagnosis")
 
-### Challenege Video diagnosis:
+### Challenge Video diagnosis:
 
 [![Track 2 - Test arena](output_images/yP2d.png)](https://www.youtube.com/watch?v=ZXkcbAebiuE "Challenge Video diagnosis")
 
@@ -181,7 +181,7 @@ The video of the diagnostic tool is shown below:
 
 [![Track 2 - Test arena](output_images/yP1.png)](https://www.youtube.com/watch?v=EFn4e0LutuE "Project Video")
 
-### Challenege Video:
+### Challenge Video:
 
 [![Track 2 - Test arena](output_images/yP2.png)](https://www.youtube.com/watch?v=r-Jz_J0xo20 "Challenge Video")
 
